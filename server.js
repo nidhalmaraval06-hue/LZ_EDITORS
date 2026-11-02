@@ -40,7 +40,7 @@ const app = express();
 app.set('trust proxy', 1);
 app.disable('x-powered-by');
 
-// Serve only the intended HTML pages. Never expose the entire project folder.
+// صفحات الموقع
 const pages = [
   'login-dashboard.html',
   'login-designers.html',
@@ -58,7 +58,7 @@ pages.forEach(page => {
   });
 });
 
-// Serve the logo only; keep server.js, .env and other project files private.
+// الشعار
 app.get('/logo.png', (_req, res) => {
   res.sendFile(path.join(__dirname, 'logo.png'));
 });
@@ -117,7 +117,7 @@ function validUrl(value) {
 const fail = (res, status, message) =>
   res.status(status).json({ error: message });
 
-// Verify Supabase access token
+// التحقق من تسجيل الدخول
 async function auth(req, res, next) {
   try {
     const token = /^Bearer (.+)$/i.exec(
@@ -141,7 +141,7 @@ async function auth(req, res, next) {
   }
 }
 
-// Get user's role
+// جلب رتبة العضو
 async function getRole(userId) {
   if (userId === process.env.OWNER_USER_ID) {
     return 'owner';
@@ -172,7 +172,7 @@ async function requireOwnerOrCoOwner(req, res, next) {
   }
 }
 
-// Health check
+// فحص السيرفر
 app.get('/api/health', (_req, res) => {
   res.json({
     ok: true,
@@ -180,7 +180,7 @@ app.get('/api/health', (_req, res) => {
   });
 });
 
-// Public designers
+// جلب المصممين
 app.get('/api/designers', async (_req, res, next) => {
   try {
     const { data, error } = await supabase
@@ -228,7 +228,7 @@ app.get('/api/designers', async (_req, res, next) => {
   }
 });
 
-// Current user
+// المستخدم الحالي
 app.get('/api/me', auth, async (req, res, next) => {
   try {
     const { data, error } = await supabase
@@ -251,7 +251,7 @@ app.get('/api/me', auth, async (req, res, next) => {
   }
 });
 
-// Update TikTok profile
+// تحديث حساب تيك توك
 app.put('/api/me/profile', auth, async (req, res, next) => {
   try {
     const tiktok = validUrl(req.body?.tiktok_url);
@@ -310,7 +310,7 @@ app.put('/api/me/profile', auth, async (req, res, next) => {
   }
 });
 
-// Public messages
+// جلب رسائل المجتمع
 app.get('/api/messages', async (req, res, next) => {
   try {
     const limit = Math.min(
@@ -334,7 +334,7 @@ app.get('/api/messages', async (req, res, next) => {
   }
 });
 
-// Send message
+// إرسال رسالة
 app.post('/api/messages', auth, async (req, res, next) => {
   try {
     const message = String(req.body?.text || '').trim();
@@ -378,10 +378,9 @@ app.post('/api/messages', auth, async (req, res, next) => {
   }
 });
 
-// Delete message
+// حذف رسالة
 app.delete('/api/messages/:id', auth, async (req, res, next) => {
   try {
-    // community_messages.id is BIGINT, not a UUID.
     const messageId = req.params.id;
 
     if (
@@ -425,7 +424,7 @@ app.delete('/api/messages/:id', auth, async (req, res, next) => {
   }
 });
 
-// Assign roles
+// تغيير رتب الأعضاء
 app.put(
   '/api/roles/:userId',
   auth,
@@ -492,7 +491,7 @@ app.put(
   }
 );
 
-// Error handler
+// معالجة الأخطاء
 app.use((error, _req, res, _next) => {
   console.error('Backend error:', error);
 
